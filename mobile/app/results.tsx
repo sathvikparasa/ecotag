@@ -177,7 +177,7 @@ export default function ResultsScreen() {
       <View style={styles.bottomBar}>
         <PrimaryButton
           label="Scan Another"
-          icon="leaf-outline"
+          image={require("../assets/images/landing_page/screen_logo.png")}
           onPress={() => router.replace("/scan")}
         />
       </View>
