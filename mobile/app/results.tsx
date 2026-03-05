@@ -7,13 +7,20 @@ import { colors, typography, spacing } from "../src/theme";
 import { PrimaryButton } from "../src/components/PrimaryButton";
 import { CO2Gauge } from "../src/components/CO2Gauge";
 import { BreakdownRow } from "../src/components/BreakdownRow";
-import { TagApiResponse, BREAKDOWN_LABELS, BREAKDOWN_ORDER } from "../src/types/api";
+import {
+  TagApiResponse,
+  BREAKDOWN_LABELS,
+  BREAKDOWN_ORDER,
+} from "../src/types/api";
 import { getScanById, toggleClosetStatus } from "../src/storage/scans";
 import { estimateLifespan } from "../src/utils/lifespan";
 
 function getFriendlyErrorMessage(code?: string, fallback?: string): string {
   if (code === "MISSING_IMAGE") {
     return "Please capture or choose an image before submitting.";
+  }
+  if (code === "NO_TAG_DETECTED") {
+    return "No clothing tag was detected. Please try again with a clearer photo of the tag.";
   }
   if (code === "UPSTREAM_ERROR") {
     return "The analysis service is temporarily unavailable. Please try again.";
@@ -108,12 +115,13 @@ export default function ResultsScreen() {
             color={isInCloset ? colors.primary : colors.text}
           />
           <View
-            style={[
-              styles.plusBadge,
-              isInCloset && styles.plusBadgeActive,
-            ]}
+            style={[styles.plusBadge, isInCloset && styles.plusBadgeActive]}
           >
-            <Ionicons name="add" size={14} color={isInCloset ? colors.white : colors.text} />
+            <Ionicons
+              name="add"
+              size={14}
+              color={isInCloset ? colors.white : colors.text}
+            />
           </View>
         </Pressable>
       </View>
@@ -143,6 +151,13 @@ export default function ResultsScreen() {
                 <Text style={styles.statLabel}>Est. Lifetime</Text>
               </View>
             </View>
+          </>
+        ) : (
+          <View style={styles.errorCard}>
+            <Text style={styles.errorTitle}>
+              We couldn't analyze that image
+            </Text>
+            <Text style={styles.errorMessage}>{friendlyMessage}</Text>
 
             <Text style={styles.sectionTitle}>Carbon Emission Breakdown</Text>
           </View>

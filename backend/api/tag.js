@@ -72,8 +72,8 @@ router.post("/tag", upload.single("image"), async (req, res) => {
       ext === "jpg" || ext === "jpeg"
         ? "image/jpeg"
         : ext === "png"
-        ? "image/png"
-        : "image/jpeg";
+          ? "image/png"
+          : "image/jpeg";
     const imageBuffer = fs.readFileSync(filePath);
     const b64 = imageBuffer.toString("base64");
     const dataUrl = `data:${mime};base64,${b64}`;
@@ -96,6 +96,18 @@ router.post("/tag", upload.single("image"), async (req, res) => {
 
     parsed = normalizeParsedForEmissions(parsed);
 
+    const hasNoTag =
+      (!parsed.materials || parsed.materials.length === 0) && !parsed.country;
+    if (hasNoTag) {
+      return res.status(422).json({
+        error: {
+          code: "NO_TAG_DETECTED",
+          message:
+            "No clothing tag was detected in the image. Please try again with a clearer photo of the tag.",
+        },
+      });
+    }
+
     try {
       const emissions = estimateEmissions(parsed);
       return res.json({ parsed, emissions });
@@ -104,7 +116,9 @@ router.post("/tag", upload.single("image"), async (req, res) => {
         err instanceof Error &&
         err.message.includes("Care instructions must be a structured object")
       ) {
-        const emissions = estimateEmissions(withFallbackCareForEmissions(parsed));
+        const emissions = estimateEmissions(
+          withFallbackCareForEmissions(parsed),
+        );
         return res.json({ parsed, emissions });
       }
       throw err;
